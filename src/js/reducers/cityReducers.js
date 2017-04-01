@@ -61,7 +61,8 @@ export const getSelectedNumbers = state => {
       }],
       selectIds:[],
       isSelected:false
-    }
+    },
+    searchList:[]
 
   }
 
@@ -135,7 +136,7 @@ const convertStateTree = json => {
   chinaJson.tierIds = Array.from(tierIdsSet).sort(function(a,b){
     return a>b;
   });
-  return {"china":chinaJson,"foregin":foreginJson};
+  return {"china":chinaJson,"foregin":foreginJson,"searchList":[]};
 }
 
 const checkRegion = (state,id) => {
@@ -303,6 +304,26 @@ const checkTool = (state,type) => {
   return state;
 }
 
+const getSearch = (state,searchValue) => {
+  state.data.searchList = [];
+  if (searchValue=="") return state;
+  //中国城市
+  for(let value of state.data.china.byCityId){
+    let reg = value.city_name.toLowerCase() + "|\\|" + value.city_name + "|\\|" + value.city_name_cn + "|\\|" + value.city_id;
+    if (reg.indexOf(searchValue)>-1) {
+      state.data.searchList.push(value.city_id);
+    };
+  }
+  //中国省份
+  for(let value of state.data.china.byProvinceId){
+    let reg = value.province_name.toLowerCase() + "|\\|" + value.province_name + "|\\|" + value.province_name_cn + "|\\|" + value.province_id;
+    if (reg.indexOf(searchValue)>-1) {
+      state.data.searchList.push(value.province_id);
+    };
+  }
+  return state;
+}
+
 const datas = (state = {}, action) => {
   switch (action.type) {
     case constants.GET_DATA_START:
@@ -323,6 +344,8 @@ const datas = (state = {}, action) => {
       return Object.assign({},checkCountry(state,action.id,action.isChecked));
     case constants.CHECK_TOOL:
       return Object.assign({},checkTool(state,action.tp));
+    case constants.GET_SEARCH:
+      return Object.assign({},getSearch(state,action.value));
     default:
       return state
   }

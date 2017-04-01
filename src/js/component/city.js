@@ -3,14 +3,8 @@ import { render } from 'react-dom'
 
 class City extends Component{
 	constructor(props){
-		// console.log(props)
+		console.log(props)
 		super(props);
-		this.handleChange = (event) => {
-			let newValue = event.target.value;	
-            if (newValue!=="") {
-            	console.log(newValue)
-            };
-		}
 	}
 	render(){
 		return (
@@ -20,7 +14,7 @@ class City extends Component{
 					<span className="sum-count sel-city-num">{this.props.selectedNum.cityNum}</span> City(ies) ; 
 					<span className="sum-count sel-country-num">{this.props.selectedNum.countryNum}</span> Country(ies) 
 					</div>
-					<CitySearch/>
+					<CitySearch {...this.props}/>
 				</div>
 				<div className="tabbox border-bottom clearfix">
 					<div className="fl tab active">
@@ -46,11 +40,45 @@ class City extends Component{
 class CitySearch extends Component{
 	constructor(props){
 		super(props);
+		this.state = {
+			isShow:"none"
+		}
 		this.handleChange = (event) => {  // input值改变的时候进行判断赋值  
             let newValue = event.target.value;	
+            let isShow = "none";
             if (newValue!=="") {
-            	console.log(newValue)
+        		this.props.getSearchList(newValue);
+        		isShow = "block";
             };
+            this.setState({
+        		isShow:isShow
+        	})
+        }
+        this.handleClick = (e) => {
+        	let value = e.target.value;
+        	let isShow = "none";
+            if (value!=="") {
+        		this.props.getSearchList(value);
+        		isShow = "block";
+            };
+            this.setState({
+        		isShow:isShow
+        	})
+        }
+        this.itemClick = (e) => {
+        	let ids = e.target.id.split("_itemid");
+        	this.setState({
+        		isShow:"none"
+        	})
+        	let notice = document.getElementsByClassName("notice-color")
+        	for(let value of notice){
+				value.className = "";
+			}
+			for(let id of ids){
+				if (id!=""){
+        			document.getElementById(id).parentNode.className = "notice-color";
+        		}
+			}
         }
 	}
 
@@ -58,7 +86,34 @@ class CitySearch extends Component{
 		return (
 			<div className="fr search-box">
 				<i className="fa fa-search"></i>
-				<input type="text" id="location_search" placeholder="Search"  onChange={this.handleChange} />
+				<input type="text" id="location_search" placeholder="Search"  onChange={this.handleChange} onClick={this.handleClick}/>
+				<div className="result-list" style={{display:this.state.isShow}}>
+					<ul>
+						{
+					 		this.props.searchList.map((item,index) => {
+					 			let thisValue = {};
+					 			for(let value of this.props.china.byCityId){
+						 			if(value.city_id === item){
+						 				thisValue.name_cn = value.city_name_cn;
+						 				thisValue.id = value.city_id;
+						 				thisValue.provinceId = value.province_id;
+						 				break;
+						 			}
+						 		}
+						 		for(let value of this.props.china.byProvinceId){
+						 			if(value.province_id === item){
+						 				thisValue.name_cn = value.province_name_cn;
+						 				thisValue.id = value.province_id;
+						 				thisValue.provinceId = value.province_id;
+						 				break;
+						 			}
+						 		}
+						 		if (!thisValue.hasOwnProperty("id")) return "";
+					 			return (<li className="result-item" key={"_item_key_"+thisValue.id} id={"_itemid"+thisValue.id +"_itemid"+thisValue.provinceId} title={thisValue.name_cn} onClick={this.itemClick}>{thisValue.name_cn}</li>)
+					 		})
+						}
+					</ul>
+				</div>
 			</div>
 		)
 	}
@@ -67,12 +122,6 @@ class CitySearch extends Component{
 class Tier extends Component{
 	constructor(props){
 		super(props)
-		// this.handleChange = (event) => {
-		// 	let newValue = event.target.value;	
-  //           if (newValue!=="") {
-  //           	console.log(newValue)
-  //           };
-		// }
 	}
 	render(){
 		return( 
@@ -100,14 +149,7 @@ class Tier extends Component{
 //Regions
 class Regions extends Component{
 	constructor(props){
-		console.log(props)
 		super(props)
-		this.handleChange = (event) => {
-			let newValue = event.target.value;	
-            if (newValue!=="") {
-            	console.log(newValue)
-            };
-		}
 	}
 	render(){
 		return( 
@@ -125,7 +167,7 @@ class Regions extends Component{
 	            	return (
 	            		<div key={"region_key_"+index} className={"border-bottom loction-row com-row clearfix "+trClass}>
 		            		<div className="row-type row-header fl col-width">
-		            			<label htmlFor={"_region"+thisValue.region_id}><input type="checkbox" checked={thisValue.isChecked} onChange={()=>this.props.clickRegionCheck(thisValue.region_id)}  id={"_region"+thisValue.region_id} title={thisValue.region_cn}/>{thisValue.region_cn}</label>
+		            			<label htmlFor={thisValue.region_id}><input type="checkbox" checked={thisValue.isChecked} onChange={()=>this.props.clickRegionCheck(thisValue.region_id)}  id={thisValue.region_id} title={thisValue.region_cn}/>{thisValue.region_cn}</label>
 		            		</div>
 		            		<Province region_id={thisValue.region_id} {...this.props}/>
 		            	</div>
@@ -178,7 +220,7 @@ class Province extends Component{
 			 			if (size>1) {
 			            	return(	
 				            		<div key={"province_key_"+index} className="row-item col-width" onMouseOver={this.onMouseOver} onMouseLeave={this.onMouseLeave}>
-				            			<label htmlFor={"_province"+thisValue.province_id}><input type="checkbox" checked={thisValue.isChecked} onChange={()=>this.props.clickProvinceCheck(thisValue.province_id)} id={"_province"+thisValue.province_id} title={thisValue.province_name_cn}/>{thisValue.province_name_cn}</label>
+				            			<label htmlFor={thisValue.province_id}><input type="checkbox" checked={thisValue.isChecked} onChange={()=>this.props.clickProvinceCheck(thisValue.province_id)} id={thisValue.province_id} title={thisValue.province_name_cn}/>{thisValue.province_name_cn}</label>
 				            			<span className="city-num" style={{display:isshow}}>{selectedNum}/{size}</span>
 				            			<Citytown province_id={thisValue.province_id} {...this.props}/>
 					            	</div>
@@ -186,7 +228,7 @@ class Province extends Component{
 			 			}else{
 			 				return(	
 				            		<div key={"province_key_"+index} className="row-item col-width citypro" onMouseOver={this.onMouseOver} onMouseLeave={this.onMouseLeave}>
-				            			<label htmlFor={"_province"+thisValue.province_id}><input type="checkbox" checked={thisValue.isChecked} onChange={()=>this.props.clickProvinceCheck(thisValue.province_id)} id={"_province"+thisValue.province_id} title={thisValue.province_name_cn}/>{thisValue.province_name_cn}</label>
+				            			<label htmlFor={thisValue.province_id}><input type="checkbox" checked={thisValue.isChecked} onChange={()=>this.props.clickProvinceCheck(thisValue.province_id)} id={thisValue.province_id} title={thisValue.province_name_cn}/>{thisValue.province_name_cn}</label>
 					            	</div>
 					        ) 
 			 			}
@@ -201,12 +243,6 @@ class Province extends Component{
 class Citytown extends Component{
 	constructor(props){
 		super(props)
-		this.handleChange = (event) => {
-			let newValue = event.target.value;	
-            if (newValue!=="") {
-            	console.log(newValue)
-            };
-		}
 	}
 	render(){
 		return( 
@@ -218,7 +254,7 @@ class Citytown extends Component{
 			 			if(this.props.province_id === thisValue.province_id){
 			            	return (
 			            		<div key={"citytown_key_"+index} className="city-item">
-			            			<label htmlFor={"_citytown"+thisValue.city_id} ><input type="checkbox" checked={thisValue.isChecked} onChange={()=>this.props.clickCityCheck(thisValue.city_id)}  id={"_citytown"+thisValue.city_id} title={thisValue.city_name_cn}/>{thisValue.city_name_cn}</label>
+			            			<label htmlFor={thisValue.city_id} ><input type="checkbox" checked={thisValue.isChecked} onChange={()=>this.props.clickCityCheck(thisValue.city_id)}  id={thisValue.city_id} title={thisValue.city_name_cn}/>{thisValue.city_name_cn}</label>
 				            	</div>
 			            	)
 				        }

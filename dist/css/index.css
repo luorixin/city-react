@@ -5,6 +5,11 @@ body {
     line-height: 1.52857143;
     color: #515253;
 }
+ul, li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
 .location-box{
   /*border:1px solid #dfdfdf;*/
   border-bottom: none;

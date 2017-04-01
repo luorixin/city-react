@@ -8604,7 +8604,7 @@ module.exports = g;
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.clickToolCheck = exports.clickCountryCheck = exports.clickCityCheck = exports.clickProvinceCheck = exports.clickRegionCheck = exports.clickTierCheck = exports.getData = exports.getDataSuccess = exports.getDataFailed = exports.getDataStart = undefined;
+exports.getSearchList = exports.clickToolCheck = exports.clickCountryCheck = exports.clickCityCheck = exports.clickProvinceCheck = exports.clickRegionCheck = exports.clickTierCheck = exports.getData = exports.getDataSuccess = exports.getDataFailed = exports.getDataStart = undefined;
 
 var _actionType = __webpack_require__(78);
 
@@ -8697,6 +8697,13 @@ var clickToolCheck = exports.clickToolCheck = function clickToolCheck(tp) {
 	};
 };
 
+var getSearchList = exports.getSearchList = function getSearchList(value) {
+	return {
+		type: actionType.GET_SEARCH,
+		value: value
+	};
+};
+
 /***/ }),
 /* 76 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -8744,6 +8751,7 @@ var CHECK_REGION = exports.CHECK_REGION = "CHECK_REGION";
 var CHECK_PROVINCE = exports.CHECK_PROVINCE = "CHECK_PROVINCE";
 var CHECK_CITY = exports.CHECK_CITY = "CHECK_CITY";
 var CHECK_TOOL = exports.CHECK_TOOL = "CHECK_TOOL";
+var GET_SEARCH = exports.GET_SEARCH = "GET_SEARCH";
 
 /***/ }),
 /* 79 */
@@ -8808,6 +8816,7 @@ var mapStatusToProps = function mapStatusToProps(state) {
 	return {
 		china: (0, _cityReducers.getChinaData)(state),
 		foregin: (0, _cityReducers.getForeginData)(state),
+		searchList: state.data.searchList,
 		selectedNum: (0, _cityReducers.getSelectedNumbers)(state)
 	};
 };
@@ -8894,7 +8903,8 @@ var getSelectedNumbers = exports.getSelectedNumbers = function getSelectedNumber
       }],
       selectIds:[],
       isSelected:false
-    }
+    },
+    searchList:[]
 
   }
 
@@ -9009,7 +9019,7 @@ var convertStateTree = function convertStateTree(json) {
   chinaJson.tierIds = Array.from(tierIdsSet).sort(function (a, b) {
     return a > b;
   });
-  return { "china": chinaJson, "foregin": foreginJson };
+  return { "china": chinaJson, "foregin": foreginJson, "searchList": [] };
 };
 
 var checkRegion = function checkRegion(state, id) {
@@ -9506,6 +9516,70 @@ var checkTool = function checkTool(state, type) {
   return state;
 };
 
+var getSearch = function getSearch(state, searchValue) {
+  state.data.searchList = [];
+  if (searchValue == "") return state;
+  //中国城市
+  var _iteratorNormalCompletion18 = true;
+  var _didIteratorError18 = false;
+  var _iteratorError18 = undefined;
+
+  try {
+    for (var _iterator18 = state.data.china.byCityId[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+      var value = _step18.value;
+
+      var reg = value.city_name.toLowerCase() + "|\\|" + value.city_name + "|\\|" + value.city_name_cn + "|\\|" + value.city_id;
+      if (reg.indexOf(searchValue) > -1) {
+        state.data.searchList.push(value.city_id);
+      };
+    }
+    //中国省份
+  } catch (err) {
+    _didIteratorError18 = true;
+    _iteratorError18 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion18 && _iterator18.return) {
+        _iterator18.return();
+      }
+    } finally {
+      if (_didIteratorError18) {
+        throw _iteratorError18;
+      }
+    }
+  }
+
+  var _iteratorNormalCompletion19 = true;
+  var _didIteratorError19 = false;
+  var _iteratorError19 = undefined;
+
+  try {
+    for (var _iterator19 = state.data.china.byProvinceId[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
+      var _value8 = _step19.value;
+
+      var _reg = _value8.province_name.toLowerCase() + "|\\|" + _value8.province_name + "|\\|" + _value8.province_name_cn + "|\\|" + _value8.province_id;
+      if (_reg.indexOf(searchValue) > -1) {
+        state.data.searchList.push(_value8.province_id);
+      };
+    }
+  } catch (err) {
+    _didIteratorError19 = true;
+    _iteratorError19 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion19 && _iterator19.return) {
+        _iterator19.return();
+      }
+    } finally {
+      if (_didIteratorError19) {
+        throw _iteratorError19;
+      }
+    }
+  }
+
+  return state;
+};
+
 var datas = function datas() {
   var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var action = arguments[1];
@@ -9529,6 +9603,8 @@ var datas = function datas() {
       return Object.assign({}, checkCountry(state, action.id, action.isChecked));
     case constants.CHECK_TOOL:
       return Object.assign({}, checkTool(state, action.tp));
+    case constants.GET_SEARCH:
+      return Object.assign({}, getSearch(state, action.value));
     default:
       return state;
   }
@@ -14767,17 +14843,8 @@ var City = function (_Component) {
 	function City(props) {
 		_classCallCheck(this, City);
 
-		var _this = _possibleConstructorReturn(this, (City.__proto__ || Object.getPrototypeOf(City)).call(this, props));
-		// console.log(props)
-
-
-		_this.handleChange = function (event) {
-			var newValue = event.target.value;
-			if (newValue !== "") {
-				console.log(newValue);
-			};
-		};
-		return _this;
+		console.log(props);
+		return _possibleConstructorReturn(this, (City.__proto__ || Object.getPrototypeOf(City)).call(this, props));
 	}
 
 	_createClass(City, [{
@@ -14808,7 +14875,7 @@ var City = function (_Component) {
 						),
 						" Country(ies)"
 					),
-					_react2.default.createElement(CitySearch, null)
+					_react2.default.createElement(CitySearch, this.props)
 				),
 				_react2.default.createElement(
 					"div",
@@ -14879,12 +14946,89 @@ var CitySearch = function (_Component2) {
 
 		var _this3 = _possibleConstructorReturn(this, (CitySearch.__proto__ || Object.getPrototypeOf(CitySearch)).call(this, props));
 
+		_this3.state = {
+			isShow: "none"
+		};
 		_this3.handleChange = function (event) {
 			// input值改变的时候进行判断赋值  
 			var newValue = event.target.value;
+			var isShow = "none";
 			if (newValue !== "") {
-				console.log(newValue);
+				_this3.props.getSearchList(newValue);
+				isShow = "block";
 			};
+			_this3.setState({
+				isShow: isShow
+			});
+		};
+		_this3.handleClick = function (e) {
+			var value = e.target.value;
+			var isShow = "none";
+			if (value !== "") {
+				_this3.props.getSearchList(value);
+				isShow = "block";
+			};
+			_this3.setState({
+				isShow: isShow
+			});
+		};
+		_this3.itemClick = function (e) {
+			var ids = e.target.id.split("_itemid");
+			_this3.setState({
+				isShow: "none"
+			});
+			var notice = document.getElementsByClassName("notice-color");
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
+
+			try {
+				for (var _iterator = notice[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var value = _step.value;
+
+					value.className = "";
+				}
+			} catch (err) {
+				_didIteratorError = true;
+				_iteratorError = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
+					}
+				} finally {
+					if (_didIteratorError) {
+						throw _iteratorError;
+					}
+				}
+			}
+
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
+
+			try {
+				for (var _iterator2 = ids[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var id = _step2.value;
+
+					if (id != "") {
+						document.getElementById(id).parentNode.className = "notice-color";
+					}
+				}
+			} catch (err) {
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
+					}
+				} finally {
+					if (_didIteratorError2) {
+						throw _iteratorError2;
+					}
+				}
+			}
 		};
 		return _this3;
 	}
@@ -14892,11 +15036,90 @@ var CitySearch = function (_Component2) {
 	_createClass(CitySearch, [{
 		key: "render",
 		value: function render() {
+			var _this4 = this;
+
 			return _react2.default.createElement(
 				"div",
 				{ className: "fr search-box" },
 				_react2.default.createElement("i", { className: "fa fa-search" }),
-				_react2.default.createElement("input", { type: "text", id: "location_search", placeholder: "Search", onChange: this.handleChange })
+				_react2.default.createElement("input", { type: "text", id: "location_search", placeholder: "Search", onChange: this.handleChange, onClick: this.handleClick }),
+				_react2.default.createElement(
+					"div",
+					{ className: "result-list", style: { display: this.state.isShow } },
+					_react2.default.createElement(
+						"ul",
+						null,
+						this.props.searchList.map(function (item, index) {
+							var thisValue = {};
+							var _iteratorNormalCompletion3 = true;
+							var _didIteratorError3 = false;
+							var _iteratorError3 = undefined;
+
+							try {
+								for (var _iterator3 = _this4.props.china.byCityId[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+									var value = _step3.value;
+
+									if (value.city_id === item) {
+										thisValue.name_cn = value.city_name_cn;
+										thisValue.id = value.city_id;
+										thisValue.provinceId = value.province_id;
+										break;
+									}
+								}
+							} catch (err) {
+								_didIteratorError3 = true;
+								_iteratorError3 = err;
+							} finally {
+								try {
+									if (!_iteratorNormalCompletion3 && _iterator3.return) {
+										_iterator3.return();
+									}
+								} finally {
+									if (_didIteratorError3) {
+										throw _iteratorError3;
+									}
+								}
+							}
+
+							var _iteratorNormalCompletion4 = true;
+							var _didIteratorError4 = false;
+							var _iteratorError4 = undefined;
+
+							try {
+								for (var _iterator4 = _this4.props.china.byProvinceId[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+									var _value = _step4.value;
+
+									if (_value.province_id === item) {
+										thisValue.name_cn = _value.province_name_cn;
+										thisValue.id = _value.province_id;
+										thisValue.provinceId = _value.province_id;
+										break;
+									}
+								}
+							} catch (err) {
+								_didIteratorError4 = true;
+								_iteratorError4 = err;
+							} finally {
+								try {
+									if (!_iteratorNormalCompletion4 && _iterator4.return) {
+										_iterator4.return();
+									}
+								} finally {
+									if (_didIteratorError4) {
+										throw _iteratorError4;
+									}
+								}
+							}
+
+							if (!thisValue.hasOwnProperty("id")) return "";
+							return _react2.default.createElement(
+								"li",
+								{ className: "result-item", key: "_item_key_" + thisValue.id, id: "_itemid" + thisValue.id + "_itemid" + thisValue.provinceId, title: thisValue.name_cn, onClick: _this4.itemClick },
+								thisValue.name_cn
+							);
+						})
+					)
+				)
 			);
 		}
 	}]);
@@ -14913,31 +15136,25 @@ var Tier = function (_Component3) {
 		_classCallCheck(this, Tier);
 
 		return _possibleConstructorReturn(this, (Tier.__proto__ || Object.getPrototypeOf(Tier)).call(this, props));
-		// this.handleChange = (event) => {
-		// 	let newValue = event.target.value;	
-		//           if (newValue!=="") {
-		//           	console.log(newValue)
-		//           };
-		// }
 	}
 
 	_createClass(Tier, [{
 		key: "render",
 		value: function render() {
-			var _this5 = this;
+			var _this6 = this;
 
 			return _react2.default.createElement(
 				"div",
 				{ className: "border-bottom loc-type-header loction-row clearfix" },
 				this.props.tierIds.map(function (item, index) {
 					var thisValue = {};
-					var _iteratorNormalCompletion = true;
-					var _didIteratorError = false;
-					var _iteratorError = undefined;
+					var _iteratorNormalCompletion5 = true;
+					var _didIteratorError5 = false;
+					var _iteratorError5 = undefined;
 
 					try {
-						for (var _iterator = _this5.props.byTierId[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-							var value = _step.value;
+						for (var _iterator5 = _this6.props.byTierId[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+							var value = _step5.value;
 
 							if (value.tier_id === item) {
 								thisValue = value;
@@ -14945,16 +15162,16 @@ var Tier = function (_Component3) {
 							}
 						}
 					} catch (err) {
-						_didIteratorError = true;
-						_iteratorError = err;
+						_didIteratorError5 = true;
+						_iteratorError5 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion && _iterator.return) {
-								_iterator.return();
+							if (!_iteratorNormalCompletion5 && _iterator5.return) {
+								_iterator5.return();
 							}
 						} finally {
-							if (_didIteratorError) {
-								throw _iteratorError;
+							if (_didIteratorError5) {
+								throw _iteratorError5;
 							}
 						}
 					}
@@ -14966,7 +15183,7 @@ var Tier = function (_Component3) {
 							"label",
 							{ htmlFor: "_tier" + thisValue.tier_id },
 							_react2.default.createElement("input", { type: "checkbox", checked: thisValue.isChecked, onChange: function onChange() {
-									return _this5.props.clickTierCheck(thisValue.tier_id);
+									return _this6.props.clickTierCheck(thisValue.tier_id);
 								}, id: "_tier" + thisValue.tier_id, title: thisValue.tier_name_en_us }),
 							thisValue.tier_name_en_us
 						)
@@ -14987,23 +15204,13 @@ var Regions = function (_Component4) {
 	function Regions(props) {
 		_classCallCheck(this, Regions);
 
-		console.log(props);
-
-		var _this6 = _possibleConstructorReturn(this, (Regions.__proto__ || Object.getPrototypeOf(Regions)).call(this, props));
-
-		_this6.handleChange = function (event) {
-			var newValue = event.target.value;
-			if (newValue !== "") {
-				console.log(newValue);
-			};
-		};
-		return _this6;
+		return _possibleConstructorReturn(this, (Regions.__proto__ || Object.getPrototypeOf(Regions)).call(this, props));
 	}
 
 	_createClass(Regions, [{
 		key: "render",
 		value: function render() {
-			var _this7 = this;
+			var _this8 = this;
 
 			return _react2.default.createElement(
 				"div",
@@ -15011,13 +15218,13 @@ var Regions = function (_Component4) {
 				this.props.china.regionIds.map(function (item, index) {
 					var thisValue = {};
 					var trClass = index % 2 === 0 ? "odd" : "";
-					var _iteratorNormalCompletion2 = true;
-					var _didIteratorError2 = false;
-					var _iteratorError2 = undefined;
+					var _iteratorNormalCompletion6 = true;
+					var _didIteratorError6 = false;
+					var _iteratorError6 = undefined;
 
 					try {
-						for (var _iterator2 = _this7.props.china.byRegionId[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-							var value = _step2.value;
+						for (var _iterator6 = _this8.props.china.byRegionId[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+							var value = _step6.value;
 
 							if (value.region_id === item) {
 								thisValue = value;
@@ -15025,16 +15232,16 @@ var Regions = function (_Component4) {
 							}
 						}
 					} catch (err) {
-						_didIteratorError2 = true;
-						_iteratorError2 = err;
+						_didIteratorError6 = true;
+						_iteratorError6 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion2 && _iterator2.return) {
-								_iterator2.return();
+							if (!_iteratorNormalCompletion6 && _iterator6.return) {
+								_iterator6.return();
 							}
 						} finally {
-							if (_didIteratorError2) {
-								throw _iteratorError2;
+							if (_didIteratorError6) {
+								throw _iteratorError6;
 							}
 						}
 					}
@@ -15047,14 +15254,14 @@ var Regions = function (_Component4) {
 							{ className: "row-type row-header fl col-width" },
 							_react2.default.createElement(
 								"label",
-								{ htmlFor: "_region" + thisValue.region_id },
+								{ htmlFor: thisValue.region_id },
 								_react2.default.createElement("input", { type: "checkbox", checked: thisValue.isChecked, onChange: function onChange() {
-										return _this7.props.clickRegionCheck(thisValue.region_id);
-									}, id: "_region" + thisValue.region_id, title: thisValue.region_cn }),
+										return _this8.props.clickRegionCheck(thisValue.region_id);
+									}, id: thisValue.region_id, title: thisValue.region_cn }),
 								thisValue.region_cn
 							)
 						),
-						_react2.default.createElement(Province, _extends({ region_id: thisValue.region_id }, _this7.props))
+						_react2.default.createElement(Province, _extends({ region_id: thisValue.region_id }, _this8.props))
 					);
 				})
 			);
@@ -15070,32 +15277,32 @@ var Province = function (_Component5) {
 	function Province(props) {
 		_classCallCheck(this, Province);
 
-		var _this8 = _possibleConstructorReturn(this, (Province.__proto__ || Object.getPrototypeOf(Province)).call(this, props));
+		var _this9 = _possibleConstructorReturn(this, (Province.__proto__ || Object.getPrototypeOf(Province)).call(this, props));
 
-		_this8.onMouseOver = function (event) {
+		_this9.onMouseOver = function (event) {
 			if (event.target.className.indexOf("row-item col-width") > -1) {
 				var $hover = document.getElementsByClassName('hover');
-				var _iteratorNormalCompletion3 = true;
-				var _didIteratorError3 = false;
-				var _iteratorError3 = undefined;
+				var _iteratorNormalCompletion7 = true;
+				var _didIteratorError7 = false;
+				var _iteratorError7 = undefined;
 
 				try {
-					for (var _iterator3 = $hover[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-						var value = _step3.value;
+					for (var _iterator7 = $hover[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+						var value = _step7.value;
 
 						value.className = "row-item col-width";
 					}
 				} catch (err) {
-					_didIteratorError3 = true;
-					_iteratorError3 = err;
+					_didIteratorError7 = true;
+					_iteratorError7 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion3 && _iterator3.return) {
-							_iterator3.return();
+						if (!_iteratorNormalCompletion7 && _iterator7.return) {
+							_iterator7.return();
 						}
 					} finally {
-						if (_didIteratorError3) {
-							throw _iteratorError3;
+						if (_didIteratorError7) {
+							throw _iteratorError7;
 						}
 					}
 				}
@@ -15104,53 +15311,53 @@ var Province = function (_Component5) {
 				event.target.className = "row-item col-width hover";
 			}
 		};
-		_this8.onMouseLeave = function (event) {
+		_this9.onMouseLeave = function (event) {
 			if (event.target.className == "row-item col-width hover") {
 				event.target.className = "row-item col-width";
 			}
 		};
-		return _this8;
+		return _this9;
 	}
 
 	_createClass(Province, [{
 		key: "render",
 		value: function render() {
-			var _this9 = this;
+			var _this10 = this;
 
 			return _react2.default.createElement(
 				"div",
 				{ className: "row-item-box row-children fl clearfix" },
 				this.props.china.byProvinceId.map(function (thisValue, index) {
-					if (_this9.props.region_id === thisValue.region_id) {
+					if (_this10.props.region_id === thisValue.region_id) {
 						var size = 0,
 						    isshow = "none",
 						    selectedNum = 0;
-						var _iteratorNormalCompletion4 = true;
-						var _didIteratorError4 = false;
-						var _iteratorError4 = undefined;
+						var _iteratorNormalCompletion8 = true;
+						var _didIteratorError8 = false;
+						var _iteratorError8 = undefined;
 
 						try {
-							for (var _iterator4 = _this9.props.china.byCityId[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-								var v = _step4.value;
+							for (var _iterator8 = _this10.props.china.byCityId[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+								var v = _step8.value;
 
 								if (thisValue.province_id === v.province_id) {
 									size++;
-									if (_this9.props.china.selectIds.includes(v.city_id)) {
+									if (_this10.props.china.selectIds.includes(v.city_id)) {
 										selectedNum++;
 									};
 								}
 							}
 						} catch (err) {
-							_didIteratorError4 = true;
-							_iteratorError4 = err;
+							_didIteratorError8 = true;
+							_iteratorError8 = err;
 						} finally {
 							try {
-								if (!_iteratorNormalCompletion4 && _iterator4.return) {
-									_iterator4.return();
+								if (!_iteratorNormalCompletion8 && _iterator8.return) {
+									_iterator8.return();
 								}
 							} finally {
-								if (_didIteratorError4) {
-									throw _iteratorError4;
+								if (_didIteratorError8) {
+									throw _iteratorError8;
 								}
 							}
 						}
@@ -15161,13 +15368,13 @@ var Province = function (_Component5) {
 						if (size > 1) {
 							return _react2.default.createElement(
 								"div",
-								{ key: "province_key_" + index, className: "row-item col-width", onMouseOver: _this9.onMouseOver, onMouseLeave: _this9.onMouseLeave },
+								{ key: "province_key_" + index, className: "row-item col-width", onMouseOver: _this10.onMouseOver, onMouseLeave: _this10.onMouseLeave },
 								_react2.default.createElement(
 									"label",
-									{ htmlFor: "_province" + thisValue.province_id },
+									{ htmlFor: thisValue.province_id },
 									_react2.default.createElement("input", { type: "checkbox", checked: thisValue.isChecked, onChange: function onChange() {
-											return _this9.props.clickProvinceCheck(thisValue.province_id);
-										}, id: "_province" + thisValue.province_id, title: thisValue.province_name_cn }),
+											return _this10.props.clickProvinceCheck(thisValue.province_id);
+										}, id: thisValue.province_id, title: thisValue.province_name_cn }),
 									thisValue.province_name_cn
 								),
 								_react2.default.createElement(
@@ -15177,18 +15384,18 @@ var Province = function (_Component5) {
 									"/",
 									size
 								),
-								_react2.default.createElement(Citytown, _extends({ province_id: thisValue.province_id }, _this9.props))
+								_react2.default.createElement(Citytown, _extends({ province_id: thisValue.province_id }, _this10.props))
 							);
 						} else {
 							return _react2.default.createElement(
 								"div",
-								{ key: "province_key_" + index, className: "row-item col-width citypro", onMouseOver: _this9.onMouseOver, onMouseLeave: _this9.onMouseLeave },
+								{ key: "province_key_" + index, className: "row-item col-width citypro", onMouseOver: _this10.onMouseOver, onMouseLeave: _this10.onMouseLeave },
 								_react2.default.createElement(
 									"label",
-									{ htmlFor: "_province" + thisValue.province_id },
+									{ htmlFor: thisValue.province_id },
 									_react2.default.createElement("input", { type: "checkbox", checked: thisValue.isChecked, onChange: function onChange() {
-											return _this9.props.clickProvinceCheck(thisValue.province_id);
-										}, id: "_province" + thisValue.province_id, title: thisValue.province_name_cn }),
+											return _this10.props.clickProvinceCheck(thisValue.province_id);
+										}, id: thisValue.province_id, title: thisValue.province_name_cn }),
 									thisValue.province_name_cn
 								)
 							);
@@ -15208,21 +15415,13 @@ var Citytown = function (_Component6) {
 	function Citytown(props) {
 		_classCallCheck(this, Citytown);
 
-		var _this10 = _possibleConstructorReturn(this, (Citytown.__proto__ || Object.getPrototypeOf(Citytown)).call(this, props));
-
-		_this10.handleChange = function (event) {
-			var newValue = event.target.value;
-			if (newValue !== "") {
-				console.log(newValue);
-			};
-		};
-		return _this10;
+		return _possibleConstructorReturn(this, (Citytown.__proto__ || Object.getPrototypeOf(Citytown)).call(this, props));
 	}
 
 	_createClass(Citytown, [{
 		key: "render",
 		value: function render() {
-			var _this11 = this;
+			var _this12 = this;
 
 			return _react2.default.createElement(
 				"div",
@@ -15232,16 +15431,16 @@ var Citytown = function (_Component6) {
 					"div",
 					{ className: "item-box" },
 					this.props.china.byCityId.map(function (thisValue, index) {
-						if (_this11.props.province_id === thisValue.province_id) {
+						if (_this12.props.province_id === thisValue.province_id) {
 							return _react2.default.createElement(
 								"div",
 								{ key: "citytown_key_" + index, className: "city-item" },
 								_react2.default.createElement(
 									"label",
-									{ htmlFor: "_citytown" + thisValue.city_id },
+									{ htmlFor: thisValue.city_id },
 									_react2.default.createElement("input", { type: "checkbox", checked: thisValue.isChecked, onChange: function onChange() {
-											return _this11.props.clickCityCheck(thisValue.city_id);
-										}, id: "_citytown" + thisValue.city_id, title: thisValue.city_name_cn }),
+											return _this12.props.clickCityCheck(thisValue.city_id);
+										}, id: thisValue.city_id, title: thisValue.city_name_cn }),
 									thisValue.city_name_cn
 								)
 							);

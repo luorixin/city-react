@@ -71,3 +71,10 @@ export const clickToolCheck = (tp) => {
 		tp
 	}
 }
+
+export const getSearchList = (value) => {
+	return {
+		type : actionType.GET_SEARCH,
+		value
+	}
+}

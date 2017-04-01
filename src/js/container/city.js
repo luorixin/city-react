@@ -19,6 +19,7 @@ const mapStatusToProps = (state) => {
 	return {
 		china : getChinaData(state),
 		foregin : getForeginData(state),
+		searchList : state.data.searchList,
 		selectedNum : getSelectedNumbers(state),
 	}
 } 
