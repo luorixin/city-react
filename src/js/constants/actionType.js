@@ -1,0 +1,10 @@
+export const GET_DATA_START = "GET_DATA_START"
+export const GET_DATA_FAILED = "GET_DATA_FAILED"
+export const GET_DATA_SUCCESS = "GET_DATA_SUCCESS"
+export const CHECK_COUNTRY = "CHECK_COUNTRY"
+export const CHECK_TIER = "CHECK_TIER"
+export const CHECK_REGION = "CHECK_REGION"
+export const CHECK_PROVINCE = "CHECK_PROVINCE"
+export const CHECK_CITY = "CHECK_CITY"
+export const CHECK_TOOL = "CHECK_TOOL"
+
