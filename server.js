@@ -16,6 +16,7 @@ app.engine('html', engines.ejs);
 app.set('view engine', 'html');
 
 app.use(webpackDevMiddleware(compiler,{
+	publicPath: config.output.publicPath,
 	hot: true,
 	historyApiFallback: true,
 	inline: true,
@@ -30,6 +31,8 @@ app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
   next();
 });
+
+app.use(require('webpack-hot-middleware')(compiler));
 
 app.get("*",function(req,res){
 	res.render("index");

@@ -2,7 +2,7 @@ import React , { Component } from 'react'
 import {connect} from 'react-redux'
 import City from '../component/city'
 import * as mapDispatchToProps from '../actions/cityAction'
-import { getChinaData,getForeginData,getSelectedNumbers} from '../reducers/cityReducers'
+import { getChinaData,getForeginData,getSelectedNumbers,getActiveTab} from '../reducers/cityReducers'
 
 class CityCon extends Component{
 	constructor(props){
@@ -18,9 +18,10 @@ const mapStatusToProps = (state) => {
 	console.log(state);
 	return {
 		china : getChinaData(state),
-		foregin : getForeginData(state),
+		foreign : getForeginData(state),
 		searchList : state.data.searchList,
 		selectedNum : getSelectedNumbers(state),
+		activeTab : getActiveTab(state),
 	}
 } 
 

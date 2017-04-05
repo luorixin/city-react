@@ -72,9 +72,30 @@ export const clickToolCheck = (tp) => {
 	}
 }
 
+export const clickContinetCheck = (id) => {
+	return {
+		type : actionType.CHECK_CONTIENT,
+		id,
+	}
+}
+
+export const clickForeignCheck = (id) => {
+	return {
+		type : actionType.CHECK_FOREIGN,
+		id,
+	}
+}
+
 export const getSearchList = (value) => {
 	return {
 		type : actionType.GET_SEARCH,
+		value
+	}
+}
+
+export const getActiveTab = (value) => {
+	return {
+		type : actionType.GET_ACTIVE,
 		value
 	}
 }

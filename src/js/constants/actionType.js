@@ -8,4 +8,7 @@ export const CHECK_PROVINCE = "CHECK_PROVINCE"
 export const CHECK_CITY = "CHECK_CITY"
 export const CHECK_TOOL = "CHECK_TOOL"
 export const GET_SEARCH = "GET_SEARCH"
+export const GET_ACTIVE = "GET_ACTIVE"
+export const CHECK_CONTIENT = "CHECK_CONTIENT"
+export const CHECK_FOREIGN = "CHECK_FOREIGN"
 

@@ -5,15 +5,21 @@ export const getChinaData = state => {
   return state.data.china;
 }
 export const getForeginData = state => {
-  return state.data.foregin;
+  return state.data.foreign;
 }
 export const getSelectedNumbers = state => {
-  let countryNum = state.data.foregin.selectIds.length ;
+  let countryNum = state.data.foreign.selectIds.length ;
   let cityNum = state.data.china.selectIds.length ;
   return {
     cityNum : cityNum,
     countryNum : countryNum
   }
+}
+export const getActiveTab = state => {
+  return {
+    china : state.data.china.isActived,
+    foreign : state.data.foreign.isActived,
+  } 
 }
 /*state data tree
   {
@@ -53,14 +59,22 @@ export const getSelectedNumbers = state => {
       ],
       regionIds : [],
       selectIds:[],
-      isSelected:false
+      isSelected:false,
+      isActived:true
+
     },
-    "foregin":{
-      byId : [{
+    "foreign":{
+      byCountryId : [{
         
       }],
+      countryIds : [],
+      byContinentId : [{
+
+      }],
+      continentIds : [],
       selectIds:[],
-      isSelected:false
+      isSelected:false,
+      isActived:false,
     },
     searchList:[]
 
@@ -78,13 +92,17 @@ const convertStateTree = json => {
       byRegionId : [],
       regionIds : [],
       selectIds:[],
-      isSelected:false
+      isSelected:false,
+      isActived:true,
     }
-  let foreginJson = {
-      byId : [{
-        
-      }],
-      selectIds:[]
+  let foreignJson = {
+      byCountryId : [],
+      countryIds : [],
+      byContinentId : [],
+      continentIds : [],
+      selectIds:[],
+      isSelected:false,
+      isActived:false,
     }
   let regionIdsSet = new Set();
   let provinceIdsSet = new Set();
@@ -136,7 +154,29 @@ const convertStateTree = json => {
   chinaJson.tierIds = Array.from(tierIdsSet).sort(function(a,b){
     return a>b;
   });
-  return {"china":chinaJson,"foregin":foreginJson,"searchList":[]};
+  //国外
+  let continentIdsSet = new Set();
+  for(let value of json.foreign){
+    continentIdsSet.add(value.continent_id);
+    foreignJson.byContinentId.push({
+      "continent_id" : value.continent_id,
+      "continent_name" : value.continent_name,
+      "continent_name_cn" : value.continent_name_cn,
+      "isChecked" : false,
+    });
+    foreignJson.countryIds.push(value.foreign_id);
+    foreignJson.byCountryId.push({
+      "foreign_id": value.foreign_id,
+      "foreign_name": value.foreign_name,
+      "foreign_name_cn": value.foreign_name_cn,
+      "continent_id" : value.continent_id,
+      "isChecked" : false,
+    })
+  }
+  foreignJson.continentIds = Array.from(continentIdsSet).sort(function (a,b) {
+    return a>b;
+  })
+  return {"china":chinaJson,"foreign":foreignJson,"searchList":[]};
 }
 
 const checkRegion = (state,id) => {
@@ -267,6 +307,7 @@ const relateCheck = (state) => {
 
 const checkCountry = (state,id,isChecked) => {
   if (id=="china") {
+    console.log("isSelected: "+state.data.china.isSelected)
     state.data.china.selectIds = [];
     state.data.china.isSelected = isChecked;
     for(let value of state.data.china.byCityId){
@@ -285,23 +326,110 @@ const checkCountry = (state,id,isChecked) => {
       value.isChecked = isChecked;
     }
   };
+  if (id == "foreign") {
+    state.data.foreign.selectIds = [];
+    state.data.foreign.isSelected = isChecked;
+    for(let value of state.data.foreign.byContinentId){
+      value.isChecked = isChecked;
+    }
+    for(let value of state.data.foreign.byCountryId){
+      value.isChecked = isChecked;
+      if (isChecked) {
+        state.data.foreign.selectIds.push(value.foreign_id);
+      }
+    }
+  };
   return state;
 }
 
 const checkTool = (state,type) => {
   if (type==-1) {
-    state.data.china.selectIds = [];
-    for(let value of state.data.china.byCityId){
-      value.isChecked = !value.isChecked;
-      if (value.isChecked) {
-        state.data.china.selectIds.push(value.city_id);
-      };
-    }
-    relateCheck(state);
+    if (state.data.china.isActived) {
+       state.data.china.selectIds = [];
+      for(let value of state.data.china.byCityId){
+        value.isChecked = !value.isChecked;
+        if (value.isChecked) {
+          state.data.china.selectIds.push(value.city_id);
+        };
+      }
+      relateCheck(state);
+    };
+    if (state.data.foreign.isActived) {
+      state.data.foreign.selectIds = [];
+      for(let value of state.data.foreign.byCountryId){
+        value.isChecked = !value.isChecked;
+        if (value.isChecked) {
+          state.data.foreign.selectIds.push(value.foreign_id);
+        };
+      }
+      relateCheck_foreign(state);
+    };
   }else{
-    checkCountry(state,"china",false);
+    if (state.data.china.isActived) {
+      checkCountry(state,"china",false);
+    }
+    if (state.data.foreign.isActived) {
+      checkCountry(state,"foreign",false);
+    };
   }
   return state;
+}
+
+const checkContient = (state,id) => {
+  let isChecked = false;
+  for(let value of state.data.foreign.byContinentId){
+    if (value.continent_id == id) {
+      value.isChecked = !value.isChecked
+      isChecked = value.isChecked;
+    };
+  }
+  relateCountries(id,isChecked);
+  relateCheck_foreign(state);
+  return state;
+}
+
+const relateCountries = (id,isChecked) => {
+  for(let value of state.data.foreign.byCountryId){
+    if (id == value.continent_id) {
+      value.isChecked = isChecked;
+    };
+  }
+}
+
+const checkForeign = (state,id) => {
+  for(let value of state.data.foreign.byCountryId){
+    if (value.foreign_id == id) {
+      value.isChecked = !value.isChecked;
+    };
+  }
+  relateCheck_foreign(state);
+  return state;
+}
+
+const relateCheck_foreign = state => {
+  let continentIdsSet = new Set();
+  state.data.foreign.selectIds = [];
+  state.data.foreign.isSelected = true;
+  for(let value of state.data.foreign.byCountryId){
+    if (!value.isChecked) {
+      continentIdsSet.add(value.continent_id);
+      state.data.foreign.isSelected = false;
+    }else{
+      state.data.foreign.selectIds.push(value.city_id);
+    }
+  }
+  
+  for(let value of state.data.foreign.byContinentId){
+    value.isChecked = !continentIdsSet.has(value.continent_id);
+  }
+}
+
+const removeFromArray = (array,value) => {
+  let index = array.indexOf(value);
+  if (index > -1) {
+    array.splice(index, 1);
+  }
+  return array;
 }
 
 const getSearch = (state,searchValue) => {
@@ -321,9 +449,26 @@ const getSearch = (state,searchValue) => {
       state.data.searchList.push(value.province_id);
     };
   }
+  //外国国家
+  for(let value of state.data.foreign.byCountryId){
+    let reg = value.foreign_name_cn.toLowerCase() + "|\\|" + value.foreign_name + "|\\|" + value.foreign_name_cn + "|\\|" + value.foreign_id;
+    if (reg.indexOf(searchValue)>-1) {
+      state.data.searchList.push(value.foreign_id);
+    };
+  }
   return state;
 }
 
+const setActiveTab = (state,value) => {
+  if (value == "china") {
+    state.data.china.isActived = true; 
+    state.data.foreign.isActived = false; 
+  }else{
+    state.data.china.isActived = false; 
+    state.data.foreign.isActived = true; 
+  }
+  return state;
+}
 const datas = (state = {}, action) => {
   switch (action.type) {
     case constants.GET_DATA_START:
@@ -344,8 +489,14 @@ const datas = (state = {}, action) => {
       return Object.assign({},checkCountry(state,action.id,action.isChecked));
     case constants.CHECK_TOOL:
       return Object.assign({},checkTool(state,action.tp));
+    case constants.CHECK_CONTIENT:
+      return Object.assign({},checkContient(state,action.id));
+    case constants.CHECK_FOREIGN:
+      return Object.assign({},checkForeign(state,action.id));
     case constants.GET_SEARCH:
       return Object.assign({},getSearch(state,action.value));
+    case constants.GET_ACTIVE:
+      return Object.assign({},setActiveTab(state,action.value));
     default:
       return state
   }

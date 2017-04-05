@@ -5,32 +5,46 @@ class City extends Component{
 	constructor(props){
 		console.log(props)
 		super(props);
+		this.handleClick = (e,type) => {
+			if(e && e.target.nodeName=="DIV"){
+				e.preventDefault()
+				let active = document.getElementsByClassName("active")
+	        	for(let value of active){
+					value.className = "fl tab";
+				}
+				e.target.className = 'fl tab active';
+				this.props.getActiveTab(type);
+			}
+		}
 	}
 	render(){
 		return (
 			<div className="location-box">
 				<div className="header border-bottom clearfix">
-					<div className="fl">You Have Selected 
-					<span className="sum-count sel-city-num">{this.props.selectedNum.cityNum}</span> City(ies) ; 
-					<span className="sum-count sel-country-num">{this.props.selectedNum.countryNum}</span> Country(ies) 
+					<div className="fl">You Have Selected : 
+					<span className="sum-count sel-city-num"> {this.props.selectedNum.cityNum} </span> City(ies) ; 
+					<span className="sum-count sel-country-num"> {this.props.selectedNum.countryNum} </span> Country(ies) 
 					</div>
 					<CitySearch {...this.props}/>
 				</div>
 				<div className="tabbox border-bottom clearfix">
-					<div className="fl tab active">
-						<label htmlFor="_china"><input type="checkbox" id="_china" title="China" onChange={(e) => this.props.clickCountryCheck('china',e.target.checked)} checked={this.props.china.isSelected}/>China</label>
+					<div className={`fl tab ${this.props.activeTab.china ? "active" : ""}`} onClick={(e) => this.handleClick(e,'china')}>
+						<label htmlFor="_china"><input type="checkbox" id="_china" title="China" onChange={(e) => {this.props.clickCountryCheck('china',e.target.checked)}} checked={this.props.china.isSelected}/>China</label>
 					</div>
-					<div className="fl tab">
-						<label htmlFor="_overseas"><input type="checkbox" id="_overseas" title="Overseas" onChange={(e) => this.props.clickCountryCheck('foregin',e.target.checked)} checked={this.props.foregin.isSelected}/>Overseas</label>
+					<div className={`fl tab ${this.props.activeTab.foreign ? "active" : ""}`} onClick={(e) => this.handleClick(e,'foreign')}>
+						<label htmlFor="_overseas"><input type="checkbox" id="_overseas" title="Overseas" onChange={(e) => {this.props.clickCountryCheck('foreign',e.target.checked)}} checked={this.props.foreign.isSelected}/>Overseas</label>
 					</div>
 					<div className="fr">
 						<span className="loc-btn" id="invert-btn" onClick={() => this.props.clickToolCheck(-1)}>Invert</span>
 						<span className="loc-btn" id="clear-btn" onClick={() => this.props.clickToolCheck(false)}>Clear</span>
 					</div>
 				</div>
-				<div className="toggle-box act">
+				<div className={`toggle-box  ${this.props.china.isActived ? "act" : ""}`}>
 					<Tier tierIds = {this.props.china.tierIds} byTierId={this.props.china.byTierId} clickTierCheck={this.props.clickTierCheck}/>
 					<Regions {...this.props}/>
+				</div>
+				<div className={`toggle-box scroll ${this.props.foreign.isActived ? "act" : ""}`}>
+					<Continents {...this.props} />
 				</div>
 			</div>
 		)
@@ -43,6 +57,7 @@ class CitySearch extends Component{
 		this.state = {
 			isShow:"none"
 		}
+		
 		this.handleChange = (event) => {  // input值改变的时候进行判断赋值  
             let newValue = event.target.value;	
             let isShow = "none";
@@ -75,10 +90,12 @@ class CitySearch extends Component{
 				value.className = "";
 			}
 			for(let id of ids){
-				if (id!=""){
+				if (id){
         			document.getElementById(id).parentNode.className = "notice-color";
+        			document.getElementById(id).parentNode.focus();
         		}
 			}
+			this.searchInput.value = e.target.title;
         }
 	}
 
@@ -86,7 +103,7 @@ class CitySearch extends Component{
 		return (
 			<div className="fr search-box">
 				<i className="fa fa-search"></i>
-				<input type="text" id="location_search" placeholder="Search"  onChange={this.handleChange} onClick={this.handleClick}/>
+				<input type="text" id="location_search" ref={(input) => {this.searchInput = input}} placeholder="Search"  onChange={this.handleChange} onClick={this.handleClick}/>
 				<div className="result-list" style={{display:this.state.isShow}}>
 					<ul>
 						{
@@ -105,6 +122,14 @@ class CitySearch extends Component{
 						 				thisValue.name_cn = value.province_name_cn;
 						 				thisValue.id = value.province_id;
 						 				thisValue.provinceId = value.province_id;
+						 				break;
+						 			}
+						 		}
+						 		for(let value of this.props.foreign.byCountryId){
+						 			if(value.foreign_id === item){
+						 				thisValue.name_cn = value.foreign_name_cn;
+						 				thisValue.id = value.foreign_id;
+						 				thisValue.provinceId = value.foreign_id;
 						 				break;
 						 			}
 						 		}
@@ -261,6 +286,60 @@ class Citytown extends Component{
 		            })
 				}
 				</div>
+			</div>
+		)
+	}
+}
+
+class Continents extends Component {
+	constructor(props){
+		super(props);
+	}
+	render(){
+		return(
+			<div>
+			{
+				this.props.foreign.continentIds.map((item,index)=>{
+					let thisValue = {};
+					let trClass = index%2===0?"odd":""
+			 		for(let value of this.props.foreign.byContinentId){
+			 			if(value.continent_id === item){
+			 				thisValue = value;
+			 				break;
+			 			}
+			 		}
+	            	return (
+	            		<div key={"contient_key_"+index} className={"fg-row com-row clearfix "+trClass}>
+		            		<div className="fg-type row-header fl">
+		            			<label htmlFor={thisValue.continent_id}><input type="checkbox" checked={thisValue.isChecked} onChange={()=>this.props.clickContinetCheck(thisValue.continent_id)}  id={thisValue.continent_id} title={thisValue.continent_name_cn}/>{thisValue.continent_name_cn}</label>
+		            		</div>
+		            		<Countries continent_id={thisValue.continent_id} {...this.props}/>
+		            	</div>
+	            	)
+				})
+			}
+			</div>
+		)
+	}
+}
+class Countries extends Component {
+	constructor(props){
+		super(props)
+	}
+	render() {
+		return(
+			<div className="fg-item-box row-children fl">
+			{
+				this.props.foreign.byCountryId.map((thisValue,index) => {
+					if(this.props.continent_id === thisValue.continent_id) {
+						return (
+							<div key={"foreign_key_"+index}  className="fg-item">
+		            			<label htmlFor={thisValue.foreign_id}><input type="checkbox" checked={thisValue.isChecked} onChange={()=>this.props.clickForeignCheck(thisValue.foreign_id)}  id={thisValue.foreign_id} title={thisValue.foreign_name_cn}/>{thisValue.foreign_name_cn}</label>
+							</div>
+						)
+					}
+				})
+			}
 			</div>
 		)
 	}
