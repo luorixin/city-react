@@ -59,7 +59,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "2cfca449362f901b7030"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "4ef90e41f5ca5d70f1bf"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotMainModule = true; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
@@ -10034,7 +10034,6 @@ var relateCheck = function relateCheck(state) {
 
 var checkCountry = function checkCountry(state, id, isChecked) {
   if (id == "china") {
-    console.log("isSelected: " + state.data.china.isSelected);
     state.data.china.selectIds = [];
     state.data.china.isSelected = isChecked;
     var _iteratorNormalCompletion14 = true;
@@ -10306,12 +10305,12 @@ var checkContient = function checkContient(state, id) {
     }
   }
 
-  relateCountries(id, isChecked);
+  relateCountries(state, id, isChecked);
   relateCheck_foreign(state);
   return state;
 };
 
-var relateCountries = function relateCountries(id, isChecked) {
+var relateCountries = function relateCountries(state, id, isChecked) {
   var _iteratorNormalCompletion23 = true;
   var _didIteratorError23 = false;
   var _iteratorError23 = undefined;

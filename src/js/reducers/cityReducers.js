@@ -307,7 +307,6 @@ const relateCheck = (state) => {
 
 const checkCountry = (state,id,isChecked) => {
   if (id=="china") {
-    console.log("isSelected: "+state.data.china.isSelected)
     state.data.china.selectIds = [];
     state.data.china.isSelected = isChecked;
     for(let value of state.data.china.byCityId){
@@ -383,12 +382,12 @@ const checkContient = (state,id) => {
       isChecked = value.isChecked;
     };
   }
-  relateCountries(id,isChecked);
+  relateCountries(state,id,isChecked);
   relateCheck_foreign(state);
   return state;
 }
 
-const relateCountries = (id,isChecked) => {
+const relateCountries = (state,id,isChecked) => {
   for(let value of state.data.foreign.byCountryId){
     if (id == value.continent_id) {
       value.isChecked = isChecked;
