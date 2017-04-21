@@ -7,6 +7,7 @@ import { createStore, applyMiddleware } from 'redux'
 import reducers from './js/reducers'
 import routes from './js/router/router'
 import {getData} from './js/actions/cityAction'
+import {keywordsInit} from './js/actions/keywordsLayerAction'
 import './css/city.css'
 
 
@@ -19,7 +20,7 @@ const store = createStore(
 	applyMiddleware(...middleware)
 )
 store.dispatch(getData("./"));
-
+store.dispatch(keywordsInit());
 class Test extends Component{
 	constructor(props){
 		super(props)

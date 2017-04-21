@@ -2,14 +2,14 @@ import * as constants from '../constants/actionType'
 import { combineReducers } from 'redux'
 
 export const getChinaData = state => {
-  return state.data.china;
+  return state.city.data.china;
 }
 export const getForeginData = state => {
-  return state.data.foreign;
+  return state.city.data.foreign;
 }
 export const getSelectedNumbers = state => {
-  let countryNum = state.data.foreign.selectIds.length ;
-  let cityNum = state.data.china.selectIds.length ;
+  let countryNum = state.city.data.foreign.selectIds.length ;
+  let cityNum = state.city.data.china.selectIds.length ;
   return {
     cityNum : cityNum,
     countryNum : countryNum
@@ -17,8 +17,8 @@ export const getSelectedNumbers = state => {
 }
 export const getActiveTab = state => {
   return {
-    china : state.data.china.isActived,
-    foreign : state.data.foreign.isActived,
+    china : state.city.data.china.isActived,
+    foreign : state.city.data.foreign.isActived,
   } 
 }
 /*state data tree
